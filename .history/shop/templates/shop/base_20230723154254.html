@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>E-commerce Site</title>
+    <!-- Подключение Bootstrap -->
+
+        <!-- Add this line for Bootstrap CSS -->
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+        <!-- Add this line for jQuery -->
+        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+        <!-- Add this line for Bootstrap JS -->
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    
+    <style>
+        .navbar-custom {
+            background-color: #4285F4;
+        }
+
+        .navbar-custom .navbar-brand,
+        .navbar-custom .nav-link {
+            color: #FFFFFF;
+        }
+
+        .navbar-custom .navbar-brand:hover,
+        .navbar-custom .nav-link:hover {
+            color: #E0E0E0;
+        }
+
+        /* New style for the hamburger menu icon - white color */
+        .navbar-toggler-icon {
+            background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3e%3cpath stroke='rgba(255, 255, 255, 1)' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-custom">
+    <a class="navbar-brand" href="/">Logo</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <!-- The hamburger menu icon will be displayed here -->
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+                <a class="nav-link" href="#">Profile</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">Products</a>
+            </li>
+            <li class="nav-item">
+                <button id="cart" type="button" class="btn btn-secondary" data-bs-toggle="popover" data-bs-placement="bottom" data-bs-content="">
+                    Cart
+                </button>
+            </li>
+            
+        </ul>
+    </div>
+</nav>
+
+<div class="container">
+    <style>
+        .card {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+    
+        .card-body {
+            flex-grow: 1;
+        }
+    </style>
+    
+    <div class="container">
+        <h1>Product List</h1>
+        <div class="row">
+            <div class="col-md-12 mb-3">
+                <form class="form-inline">
+                    <input class="form-control mr-sm-2" name='search' type="search" placeholder="Search" aria-label="Search">
+                    <button class="btn btn-primary my-2 my-sm-0" type="submit">Search</button>
+                </form>
+            </div>
+        </div>
+       <div class="row">
+        {% if products %}
+        {% for product in products %}
+        <div class="col-md-3">
+            <a href="{% url 'product-details' product.id %}" class="card-link">
+                <div class="card mb-3">
+                    <img src="{{ product.image }}" class="card-img-top" alt="Product Image" style="height: 200px; object-fit: contain;">
+                    <div class="card-body">
+                        <h5 id='nm{{ product.id }}'class="card-title" style="color:black">{{ product.name }}</h5>
+                        <p class="card-text price text-success">{{ product.price }} $</p>
+                        <!-- Move the closing </a> tag here -->
+            </a>
+                        <button id="{{ product.id }}" class=" atc btn btn-primary mt-4">Add to Cart</button>
+                    </div>
+                </div>
+            
+        </div>
+        {% endfor %}
+        {% else %}
+        <div class="col-md-12">
+            <p class="text-center">No products found.</p>
+        </div>
+        {% endif %}
+    </div>
+    
+        {% if products.has_other_pages %}
+        <div class="row">
+            <div class="col-md-12">
+                <nav aria-label="Product pagination">
+                    <ul class="pagination justify-content-center">
+                        {% if products.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ products.previous_page_number }}">Previous</a>
+                        </li>
+                        {% endif %}
+                        <li class="page-item active">
+                            <a class="page-link" href="#">{{ products.number }}</a>
+                        </li>
+                        {% if products.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ products.next_page_number }}">Next</a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://unpkg.com/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.1.0-beta1/js/bootstrap.min.js"></script>
+    <script type="text/javascript">
+        if (localStorage.getItem('cart') == null) {
+            var cart = {};
+        } else {
+            cart = JSON.parse(localStorage.getItem('cart'));
+        }
+    
+        // Function to generate the popover content
+        function generatePopoverContent(cart) {
+            var content = "<ul class='list-group'>";
+            for (var item in cart) {
+                content += "<li class='list-group-item'>" + item + ": " + cart[item] + " items</li>";
+            }
+            content += "</ul>";
+            return content;
+        }
+    
+        // Initialize the popover
+        $(function () {
+            $('[data-bs-toggle="popover"]').popover({
+                html: true,
+                content: generatePopoverContent(cart)
+            });
+        });
+    
+        // Update cart count and popover content when adding items
+        $(document).on('click', '.atc', function () {
+            item_id = this.id.toString();
+            console.log(item_id);
+    
+            if (cart[item_id] != undefined) {
+                cart[item_id] = cart[item_id] + 1;
+            } else {
+                cart[item_id] = 1;
+            }
+            console.log(cart);
+            localStorage.setItem('cart', JSON.stringify(cart));
+    
+            // Update cart count and popover content
+            document.getElementById('cart').innerHTML = 'Cart(' + Object.keys(cart).length + ')';
+            $('[data-bs-toggle="popover"]').attr('data-bs-content', generatePopoverContent(cart));
+        });
+    
+        document.getElementById('cart').innerHTML = 'Cart(' + Object.keys(cart).length + ')';
+    
+    </script>
+</div>
+
+</body>
+
+
+</html>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>E-commerce Site</title>
+    <!-- Подключение Bootstrap -->
+
+    <!-- Добавьте эту строку для стилей Bootstrap -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Добавьте эту строку для jQuery -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <!-- Добавьте эту строку для JS Bootstrap -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <style>
+        .navbar-custom {
+            background-color: #4285F4;
+        }
+
+        .navbar-custom .navbar-brand,
+        .navbar-custom .nav-link {
+            color: #FFFFFF;
+        }
+
+        .navbar-custom .navbar-brand:hover,
+        .navbar-custom .nav-link:hover {
+            color: #E0E0E0;
+        }
+
+        /* Новый стиль для иконки гамбургер-меню - белый цвет */
+        .navbar-toggler-icon {
+            background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3e%3cpath stroke='rgba(255, 255, 255, 1)' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-custom">
+    <a class="navbar-brand" href="/">Логотип</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <!-- Иконка гамбургер-меню будет отображаться здесь -->
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+                <a class="nav-link" href="#">Профиль</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">Товары</a>
+            </li>
+            <li class="nav-item">
+                <button id="cart" type="button" class="btn btn-secondary" data-bs-toggle="popover"
+                        data-bs-placement="bottom" data-bs-content="">
+                    Корзина
+                </button>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<div class="container">
+    <!-- Ваш существующий код здесь -->
+
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://unpkg.com/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/5.1.0-beta1/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+    // Если корзина пуста, создаем пустой объект корзины
+    if (localStorage.getItem('cart') == null) {
+        var cart = {};
+    } else {
+        cart = JSON.parse(localStorage.getItem('cart'));
+    }
+
+    // Функция для генерации содержимого popover
+    function generatePopoverContent(cart) {
+        var content = "<ul class='list-group'>";
+        for (var item in cart) {
+            content += "<li class='list-group-item'>" + item + ": " + cart[item] + " шт.</li>";
+        }
+        content += "</ul>";
+        return content;
+    }
+
+    // Инициализация popover
+    $(function () {
+        $('[data-bs-toggle="popover"]').popover({
+            html: true,
+            content: generatePopoverContent(cart)
+        });
+    });
+
+    // Обновление количества товаров в корзине и содержимого popover при добавлении товаров
+    $(document).on('click', '.atc', function () {
+        item_id = this.id.toString();
+        console.log(item_id);
+
+        if (cart[item_id] != undefined) {
+            cart[item_id] = cart[item_id] + 1;
+        } else {
+            cart[item_id] = 1;
+        }
+        console.log(cart);
+        localStorage.setItem('cart', JSON.stringify(cart));
+
+        // Обновление количества товаров в корзине и содержимого popover
+        document.getElementById('cart').innerHTML = 'Корзина(' + Object.keys(cart).length + ')';
+        $('[data-bs-toggle="popover"]').attr('data-bs-content', generatePopoverContent(cart));
+    });
+
+    document.getElementById('cart').innerHTML = 'Корзина(' + Object.keys(cart).length + ')';
+
+</script>
+</body>
+</html>

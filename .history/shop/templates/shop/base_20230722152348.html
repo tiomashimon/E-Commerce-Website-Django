@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>E-commerce Site</title>
+    <!-- Подключение Bootstrap -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+    <style>
+        .navbar-custom {
+            background-color: #4285F4;
+        }
+
+        .navbar-custom .navbar-brand,
+        .navbar-custom .nav-link {
+            color: #FFFFFF;
+        }
+
+        .navbar-custom .navbar-brand:hover,
+        .navbar-custom .nav-link:hover {
+            color: #E0E0E0;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-custom">
+    <a class="navbar-brand" href="/">Logo</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <!-- The hamburger menu icon will be displayed here -->
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+                <a class="nav-link" href="#">Profile</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">Products</a>
+            </li>
+            <li class="nav-item">
+                <!-- Cart button with popover -->
+                <a class="nav-link" id="cart" href="#" data-toggle="popover" data-placement="bottom" title="Your Cart">
+                    Cart
+                </a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<!-- Popover content template -->
+<div id="popover-content" style="display: none;">
+    {% for product in products %}
+    <div class="d-flex justify-content-between">
+        <span>{{ product.name }}</span>
+        <span>Price: ${{ product.price }}</span>
+        <span class="text-danger delete-product">✕</span>
+    </div>
+    {% endfor %}
+    <hr>
+    <p>Total: ${{ total_price }}</p>
+</div>
+{% block content %}
+{% endblock %}
+
+<!-- Подключение скриптов Bootstrap -->
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js" integrity="sha384-fbbOQedDUMZZ5KreZpsbe1LCZPVmfTnH7ois6mU1QK+m14rQ1l2bGBq41eYeM/fS" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+<script>
+    // Dummy data for the products (replace this with your actual data)
+    const products = [
+        { name: "Product 1", price: 10 },
+        { name: "Product 2", price: 20 },
+        { name: "Product 3", price: 30 }
+    ];
+    const total_price = products.reduce((total, product) => total + product.price, 0);
+
+    // Function to handle the delete action (you need to add your own functionality here)
+    function handleDelete() {
+        console.log("Delete button clicked!");
+        // Add your code to handle the deletion from localStorage
+    }
+
+    // Initialize the popover
+    $(function () {
+        $("#cart").popover({
+            html: true,
+            content: function () {
+                return $("#popover-content").html();
+            },
+            sanitize: false // Disable content sanitization to allow the HTML tags
+        });
+    });
+
+    // Attach event listener to the delete-product class
+    $(document).on("click", ".delete-product", function () {
+        handleDelete();
+    });
+</script>
+</body>
+</html>

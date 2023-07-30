@@ -1,0 +1,108 @@
+{% extends 'shop/base.html' %}
+
+{% block content %}
+<style>
+    .card {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .card-body {
+        flex-grow: 1;
+    }
+</style>
+
+<div class="container">
+    <h1>Product List</h1>
+    <div class="row">
+        <div class="col-md-12 mb-3">
+            <form class="form-inline">
+                <input class="form-control mr-sm-2" name='search' type="search" placeholder="Search" aria-label="Search">
+                <button class="btn btn-primary my-2 my-sm-0" type="submit">Search</button>
+            </form>
+        </div>
+    </div>
+   <div class="row">
+    {% if products %}
+    {% for product in products %}
+    <div class="col-md-3">
+        <a href="{% url 'product-details' product.id %}" class="card-link">
+            <div class="card mb-3">
+                <img src="{{ product.image }}" class="card-img-top" alt="Product Image" style="height: 200px; object-fit: contain;">
+                <div class="card-body">
+                    <h5 id='nm{{ product.id }}'class="card-title" style="color:black">{{ product.name }}</h5>
+                    <p class="card-text price text-success">{{ product.price }} $</p>
+                    <!-- Move the closing </a> tag here -->
+        </a>
+                    <button id="{{ product.id }}" class=" atc btn btn-primary mt-4">Add to Cart</button>
+                </div>
+            </div>
+        
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="col-md-12">
+        <p class="text-center">No products found.</p>
+    </div>
+    {% endif %}
+</div>
+
+    {% if products.has_other_pages %}
+    <div class="row">
+        <div class="col-md-12">
+            <nav aria-label="Product pagination">
+                <ul class="pagination justify-content-center">
+                    {% if products.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ products.previous_page_number }}">Previous</a>
+                    </li>
+                    {% endif %}
+                    <li class="page-item active">
+                        <a class="page-link" href="#">{{ products.number }}</a>
+                    </li>
+                    {% if products.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ products.next_page_number }}">Next</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </div>
+    {% endif %}
+</div>
+<script
+            src="https://code.jquery.com/jquery-3.7.0.js"
+            integrity="sha256-JlqSTELeR4TLqP0OG9dxM7yDPqX1ox/HfgiSLBj8+kM="
+            crossorigin="anonymous">
+</script>
+<script type="text/javascript">
+    if (localStorage.getItem('cart') == null){
+    var cart = {};}
+
+    else{
+        cart = JSON.parse(localStorage.getItem('cart'))
+    }
+
+    $(document).on('click', '.atc', function(){
+        item_id = this.id.toString();
+        console.log(item_id);
+
+        if (cart[item_id] != undefined){
+        cart[item_id] = cart[item_id] + 1;
+    }
+    else{
+        cart[item_id] = 1
+    }
+    console.log(cart);
+    localStorage.setItem('cart', JSON.stringify(cart));
+    });
+    document.getElementById('cart').innerHTML = 'Cart(' + Object.keys(cart).length + ')';
+    $( function () {
+        ('[data-toggle='popover'])
+    }
+</script>
+{% endblock %}
+
+
